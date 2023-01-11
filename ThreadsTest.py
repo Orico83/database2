@@ -10,15 +10,27 @@ STACK_SIZE = 1000
 
 
 def test_write(db):
-    logging.debug("started write test")
+    """
+    Tests writing values to database
+    :param db: database
+    :return: None
+    """
+    logging.info("Write test started")
     for i in range(100):
-        assert db.set_value(i, "test" + str(i))
+        assert db.set_value(i, f"t{str(i)}")
+    logging.info("Write test successful")
 
 
 def test_read(db):
-    logging.debug("started read test")
+    """
+    Tests reading values from database
+    :param db: database
+    :return: None
+    """
+    logging.info("Read test started")
     for i in range(100):
-        assert "test" + str(i) == db.get_value(i)
+        assert db.get_value(i) == f"t{str(i)}"
+    logging.info("Read test successful")
 
 
 def main():

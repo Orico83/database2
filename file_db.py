@@ -2,7 +2,8 @@
 from db import Db
 from pickle import dumps, loads
 import logging
-import win32file
+from win32file import ReadFile, WriteFile, CloseHandle, CreateFileW, GENERIC_READ, FILE_SHARE_READ, OPEN_ALWAYS, \
+    GENERIC_WRITE, CREATE_ALWAYS
 
 FILE = "database.bin"
 FORMAT = '%(asctime)s.%(msecs)03d - %(message)s'
@@ -15,46 +16,45 @@ class FileDB(Db):
     """
     def __init__(self):
         """
-        Constructor for file database
+        File database constructor
         """
         super().__init__()
 
     def load(self):
         """
-        Read database from the save file
+        Loads the database from the file.
         """
-        file = win32file.CreateFileW(FILE, win32file.GENERIC_READ, win32file.FILE_SHARE_READ
-                                     , None, win32file.OPEN_ALWAYS, 0, None)
+        file = CreateFileW(FILE, GENERIC_READ, FILE_SHARE_READ, None, OPEN_ALWAYS, 0, None)
         logging.debug("File Database: Opened file %s for reading" % FILE)
         try:
-            data = win32file.ReadFile(file, 100000000)
+            data = ReadFile(file, 100000000)
             assert data[0] == 0
             self.database = loads(data[1])
         except EOFError:
             self.database = {}
         finally:
-            win32file.CloseHandle(file)
+            CloseHandle(file)
             logging.debug("File Database: Loaded database from file " + FILE)
 
     def dump(self):
         """
-        Write database to file
+        Updates the database to the file.
         """
         logging.debug("File Database: Opened file %s for writing" % FILE)
-        file = win32file.CreateFileW(FILE, win32file.GENERIC_WRITE, 0, None, win32file.CREATE_ALWAYS, 0, None)
+        file = CreateFileW(FILE, GENERIC_WRITE, 0, None, CREATE_ALWAYS, 0, None)
         try:
-            win32file.WriteFile(file, dumps(self.database))
+            WriteFile(file, dumps(self.database))
             logging.debug("File Database: Dumped database to file " + FILE)
         finally:
-            win32file.CloseHandle(file)
+            CloseHandle(file)
 
     def set_value(self, key, val):
         """
-        if key is a key in the database set the value to val, else add key: val as a pair to the db, and update the
-        file accordingly
-        :param key: key to check
+        Updates the value of the key to the file if key is in the database.
+        Else, adds the key and the value to the file database
+        :param key: key
         :param val: value to set
-        :return: Succeeded (True/False)
+        :return: True if succeeded. Else, False
         """
         try:
             self.load()
@@ -68,18 +68,18 @@ class FileDB(Db):
 
     def get_value(self, key):
         """
-        Return the value of key if it is a key in dict, else None
-        :param key: key to check
-        :return: self.database[key] if key is a key in the dict, else None
+        Return the value of key if it's in database, else None
+        :param key: key
+        :return: The value of the key. If the key isn't in the database, returns None
         """
         self.load()
         return super().get_value(key)
 
     def delete_value(self, key):
         """
-        Deletes the value of key in the dict and returns it, if nonexistent raise KeyError
-        :param key: key to check
-        :return: deleted value if successful
+        Deletes the value of key in the file dict and returns it if it's in database. Else, None
+        :param key: key
+        :return: Deleted value if key exists. Else, None
         """
         self.load()
         res = super().delete_value(key)

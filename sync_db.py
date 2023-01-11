@@ -22,7 +22,7 @@ class SyncDB:
         self.read = CreateSemaphore(None, 10, 10, READNAME)
         self.write = CreateMutex(None, False, WRITENAME)
 
-    def read_get(self):
+    def read_acquire(self):
         """
         Acquire reading permissions
         """
@@ -36,7 +36,7 @@ class SyncDB:
         ReleaseSemaphore(self.read, 1)
         logging.debug("Sync Database: released reading permissions")
 
-    def write_get(self):
+    def write_acquire(self):
         """
         Acquire writing permissions
         """
@@ -53,36 +53,36 @@ class SyncDB:
         ReleaseMutex(self.write)
         logging.debug("Sync Database: released writing permissions")
 
-    def set_value(self, key, val):
-        """
-        set value to 'val' at key 'key'
-        :param key: key
-        :param val: value
-        :return: Succeeded (True/False)
-        """
-        self.write_get()
-        res = self.database.set_value(key, val)
-        self.write_release()
-        return res
-
     def get_value(self, key):
         """
-        Return the value of key if it is a key in dict, else None
-        :param key: key to check
-        :return: value of if key is a key in the dict, else None
+        Acquire reading permission, get the key's value and then release writing permission.
+        :param key: key
+        :return: The key's value
         """
-        self.read_get()
+        self.read_acquire()
         res = self.database.get_value(key)
         self.read_release()
         return res
 
+    def set_value(self, key, val):
+        """
+        Acquire writing permission, update the key's value and then release writing permission.
+        :param key: key
+        :param val: value to set
+        :return: True if succeeded. Else, False.
+        """
+        self.write_acquire()
+        res = self.database.set_value(key, val)
+        self.write_release()
+        return res
+
     def delete_value(self, key):
         """
-        Deletes the value of key in the dict and returns it, if nonexistent raise KeyError
-        :param key: key to check
-        :return: deleted value if successful
+        Acquire writing permission, delete the key's value and then release writing permission.
+        :param key: key
+        :return: The deleted value
         """
-        self.write_get()
+        self.write_acquire()
         self.database.delete_value(key)
         self.write_release()
 
