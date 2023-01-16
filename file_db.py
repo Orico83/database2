@@ -31,7 +31,7 @@ class FileDB(Db):
         Loads the database from the file.
         """
         file = CreateFileW(FILE, GENERIC_READ, FILE_SHARE_READ, None, OPEN_ALWAYS, 0, None)
-        logging.debug("File Database: Opened file %s for reading" % FILE)
+        logging.debug(f"File Database: Opened {FILE} for reading")
         try:
             data = ReadFile(file, 100000000)
             assert data[0] == 0
@@ -40,17 +40,17 @@ class FileDB(Db):
             self.database = {}
         finally:
             CloseHandle(file)
-            logging.debug("File Database: Loaded database from file " + FILE)
+            logging.debug(f"File Database: Loaded database from {FILE}")
 
     def dump(self):
         """
         Updates the database to the file.
         """
-        logging.debug("File Database: Opened file %s for writing" % FILE)
+        logging.debug(f"File Database: Opened {FILE} for writing")
         file = CreateFileW(FILE, GENERIC_WRITE, 0, None, CREATE_ALWAYS, 0, None)
         try:
             WriteFile(file, dumps(self.database))
-            logging.debug("File Database: Dumped database to file " + FILE)
+            logging.debug(f"File Database: Dumped database to {FILE}")
         finally:
             CloseHandle(file)
 

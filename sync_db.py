@@ -37,8 +37,8 @@ class SyncDB:
         """
         Release reading permissions
         """
-        ReleaseSemaphore(self.read, 1)
         logging.debug("Sync Database: released reading permissions")
+        ReleaseSemaphore(self.read, 1)
 
     def write_acquire(self):
         """
@@ -53,9 +53,9 @@ class SyncDB:
         """
         Release writing permissions
         """
+        logging.debug("Sync Database: released writing permissions")
         ReleaseSemaphore(self.read, 10)
         ReleaseMutex(self.write)
-        logging.debug("Sync Database: released writing permissions")
 
     def get_value(self, key):
         """

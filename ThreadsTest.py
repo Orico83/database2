@@ -5,7 +5,7 @@ Tests the database in threads mode.
 """
 from sync_db import SyncDB
 from file_db import FileDB
-import win32process
+from win32process import beginthreadex
 from win32event import WaitForSingleObject as Join, INFINITE
 import logging
 
@@ -42,55 +42,56 @@ def main():
     logging.debug("Starting tests for Multithreading")
     db = SyncDB(FileDB())
     logging.debug("\n--------------------------------------------------------\n")
-    logging.info("testing simple write perms")
-    p1 = win32process.beginthreadex(None, STACK_SIZE, test_write, (db, ), 0)[0]
+    logging.info("Testing simple write perms")
+    p1 = beginthreadex(None, STACK_SIZE, test_write, (db,), 0)[0]
     assert Join(p1, INFINITE) == 0
-    logging.info("test successful")
+    logging.info("Test successful")
     logging.debug("\n--------------------------------------------------------\n")
-    logging.info("testing simple read perms")
-    p1 = win32process.beginthreadex(None, STACK_SIZE, test_read, (db, ), 0)[0]
+    logging.info("Testing simple read perms")
+    p1 = beginthreadex(None, STACK_SIZE, test_read, (db, ), 0)[0]
     assert Join(p1, INFINITE) == 0
-    logging.info("test successful")
+    logging.info("Test successful")
     logging.debug("\n--------------------------------------------------------\n")
-    logging.info("testing read blocks writing")
-    p1 = win32process.beginthreadex(None, STACK_SIZE, test_read, (db, ), 0)[0]
-    p2 = win32process.beginthreadex(None, STACK_SIZE, test_write, (db, ), 0)[0]
-    assert Join(p1, INFINITE) == 0
-    assert Join(p2, INFINITE) == 0
-    logging.info("test successful")
-    logging.debug("\n--------------------------------------------------------\n")
-    logging.info("testing write blocks reading")
-    p1 = win32process.beginthreadex(None, STACK_SIZE, test_write, (db, ), 0)[0]
-    p2 = win32process.beginthreadex(None, STACK_SIZE, test_read, (db, ), 0)[0]
+    logging.info("Testing read blocks writing")
+    p1 = beginthreadex(None, STACK_SIZE, test_read, (db, ), 0)[0]
+    p2 = beginthreadex(None, STACK_SIZE, test_write, (db, ), 0)[0]
     assert Join(p1, INFINITE) == 0
     assert Join(p2, INFINITE) == 0
-    logging.info("test successful")
+    logging.info("Test successful")
     logging.debug("\n--------------------------------------------------------\n")
-    logging.info("testing multi reading perms possible")
+    logging.info("Testing write blocks reading")
+    p1 = beginthreadex(None, STACK_SIZE, test_write, (db, ), 0)[0]
+    p2 = beginthreadex(None, STACK_SIZE, test_read, (db, ), 0)[0]
+    assert Join(p1, INFINITE) == 0
+    assert Join(p2, INFINITE) == 0
+    logging.info("Test successful")
+    logging.debug("\n--------------------------------------------------------\n")
+    logging.info("Testing multi reading perms possible")
     threads = []
     for i in range(5):
-        thread = win32process.beginthreadex(None, STACK_SIZE, test_read, (db, ), 0)[0]
+        thread = beginthreadex(None, STACK_SIZE, test_read, (db, ), 0)[0]
         threads.append(thread)
     for i in threads:
         assert Join(i, INFINITE) == 0
-    logging.info("test successful")
+    logging.info("Test successful")
     logging.debug("\n--------------------------------------------------------\n")
-    logging.info("testing load")
+    logging.info("Testing load")
     threads = []
     for i in range(15):
-        thread = win32process.beginthreadex(None, STACK_SIZE, test_read, (db, ), 0)[0]
+        thread = beginthreadex(None, STACK_SIZE, test_read, (db, ), 0)[0]
         threads.append(thread)
     for i in range(5):
-        p1 = win32process.beginthreadex(None, STACK_SIZE, test_write, (db, ), 0)[0]
+        p1 = beginthreadex(None, STACK_SIZE, test_write, (db, ), 0)[0]
         threads.append(p1)
     for i in threads:
         assert Join(i, INFINITE) == 0
-    logging.info("test successful")
+    logging.info("Test successful")
     logging.debug("\n--------------------------------------------------------\n")
-    logging.info("testing values stay correct")
-    p1 = win32process.beginthreadex(None, STACK_SIZE, test_read, (db, ), 0)[0]
+    logging.info("Testing values stay correct")
+    p1 = beginthreadex(None, STACK_SIZE, test_read, (db, ), 0)[0]
     assert Join(p1, INFINITE) == 0
-    logging.info("test successful")
+    logging.info("Test successful")
+    logging.info("All tests successful")
 
 
 if __name__ == '__main__':
