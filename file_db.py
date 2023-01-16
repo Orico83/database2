@@ -1,3 +1,9 @@
+"""
+Author: Ori Cohen
+Date: 16/01/2023
+File database class with writing, reading and deleting capabilities to database.bin using win32file.
+Inherits from DB.
+"""
 
 from db import Db
 from pickle import dumps, loads
@@ -88,4 +94,10 @@ class FileDB(Db):
 
 
 if __name__ == '__main__':
+    file_db = FileDB()
+    assert file_db.set_value('a', 1)
+    assert file_db.get_value('a') == 1
+    assert file_db.delete_value('a') == 1
+    assert file_db.get_value('a') is None
+    assert file_db.delete_value(5) is None
     logging.basicConfig(filename="FileDB.log", filemode="a", level=logging.DEBUG, format=FORMAT, datefmt=DATEFMT)

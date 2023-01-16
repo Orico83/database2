@@ -1,6 +1,6 @@
 """
 Author: Ori Cohen.
-Date: 23/12/2022.
+Date: 16/01/2023.
 Base database class.
 """
 
@@ -45,3 +45,12 @@ class Db:
             return val
         except KeyError:
             return None
+
+
+if __name__ == '__main__':
+    db = Db()
+    assert db.set_value('a', 1)
+    assert db.get_value('a') == 1
+    assert db.delete_value('a') == 1
+    assert db.get_value('a') is None
+    assert db.delete_value(5) is None

@@ -1,3 +1,8 @@
+"""
+Author: Ori Cohen
+Date: 16/01/2023
+Tests the database in threads mode.
+"""
 from sync_db import SyncDB
 from file_db import FileDB
 import win32process

@@ -1,4 +1,8 @@
-
+"""
+Author: Ori Cohen
+Date: 16/01/2023
+Implements the synchronization between threads/processes and reading and writing permissions using win32event.
+"""
 
 from file_db import FileDB
 import logging
@@ -6,8 +10,8 @@ from win32event import CreateMutex, CreateSemaphore, WaitForSingleObject, Releas
 
 FORMAT = '%(asctime)s.%(msecs)03d - %(message)s'
 DATEFMT = '%H:%M:%S'
-READNAME = "read"
-WRITENAME = "write"
+READ = "read"
+WRITE = "write"
 
 
 class SyncDB:
@@ -19,8 +23,8 @@ class SyncDB:
         Constructor for synchronized database
         """
         self.database = db
-        self.read = CreateSemaphore(None, 10, 10, READNAME)
-        self.write = CreateMutex(None, False, WRITENAME)
+        self.read = CreateSemaphore(None, 10, 10, READ)
+        self.write = CreateMutex(None, False, WRITE)
 
     def read_acquire(self):
         """
@@ -88,4 +92,10 @@ class SyncDB:
 
 
 if __name__ == '__main__':
+    sync_db = FileDB()
+    assert sync_db.set_value('a', 1)
+    assert sync_db.get_value('a') == 1
+    assert sync_db.delete_value('a') == 1
+    assert sync_db.get_value('a') is None
+    assert sync_db.delete_value(5) is None
     logging.basicConfig(filename="SyncDB.log", filemode="a", level=logging.DEBUG, format=FORMAT, datefmt=DATEFMT)
