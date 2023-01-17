@@ -1,6 +1,6 @@
 """
 Author: Ori Cohen.
-Date: 16/01/2023.
+Date: 18/01/2023.
 Base database class.
 """
 

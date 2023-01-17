@@ -1,12 +1,12 @@
 """
 Author: Ori Cohen
-Date: 16/01/2023
+Date: 18/01/2023
 Implements the synchronization between threads/processes and reading and writing permissions using win32event.
 """
 
 from file_db import FileDB
 import logging
-from win32event import CreateMutex, CreateSemaphore, WaitForSingleObject, ReleaseMutex, ReleaseSemaphore, INFINITE
+from win32event import CreateSemaphore, CreateMutex, WaitForSingleObject, ReleaseSemaphore, ReleaseMutex, INFINITE
 
 FORMAT = '%(asctime)s.%(msecs)03d - %(message)s'
 DATEFMT = '%H:%M:%S'
@@ -31,13 +31,13 @@ class SyncDB:
         Acquire reading permissions
         """
         WaitForSingleObject(self.read, INFINITE)
-        logging.debug("Sync Database: acquired reading permissions")
+        logging.info("Sync Database: acquired reading permissions")
 
     def read_release(self):
         """
         Release reading permissions
         """
-        logging.debug("Sync Database: released reading permissions")
+        logging.info("Sync Database: released reading permissions")
         ReleaseSemaphore(self.read, 1)
 
     def write_acquire(self):
@@ -47,13 +47,13 @@ class SyncDB:
         WaitForSingleObject(self.write, INFINITE)
         for i in range(10):
             WaitForSingleObject(self.read, INFINITE)
-        logging.debug("Sync Database: acquired writing permissions")
+        logging.info("Sync Database: acquired writing permissions")
 
     def write_release(self):
         """
         Release writing permissions
         """
-        logging.debug("Sync Database: released writing permissions")
+        logging.info("Sync Database: released writing permissions")
         ReleaseSemaphore(self.read, 10)
         ReleaseMutex(self.write)
 
@@ -97,5 +97,4 @@ if __name__ == '__main__':
     assert sync_db.get_value('a') == 1
     assert sync_db.delete_value('a') == 1
     assert sync_db.get_value('a') is None
-    assert sync_db.delete_value(5) is None
-    logging.basicConfig(filename="SyncDB.log", filemode="a", level=logging.DEBUG, format=FORMAT, datefmt=DATEFMT)
+    assert sync_db.delete_value('b') is None
